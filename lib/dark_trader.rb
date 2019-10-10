@@ -1,14 +1,29 @@
 require 'nokogiri'
 require 'open-uri'
 
-page = Nokogiri::HTML(open("https://coinmarketcap.com/all/views/all/"))
-all_currencies = page.xpath('//table/tbody/tr/td[2]')
 
-res = []
+def crypto_scrapper
+  page = Nokogiri::HTML(open("https://coinmarketcap.com/all/views/all/"))
 
-all_currencies.each do |curr|
-      res << curr.text
-      puts curr.text #ou n'importe quelle autre opération de ton choix ;)
+  # récupération des données du tableau
+  table_rows = page.xpath('//table[@id="currencies-all"]/tbody/tr')
+  crypto_names = page.xpath('//table[@id="currencies-all"]/tbody/tr/td[3]')
+  crypto_values = page.xpath('//table[@id="currencies-all"]/tbody/tr/td[5]/a')
+
+  puts "Fetching data..."
+
+  results = []
+
+  # génération du Hash et création du tableau de résultat final
+  table_rows.length.times do |i|
+    res = Hash.new
+    res[crypto_names[i].text] = crypto_values[i]['data-usd'].to_f.round(2)
+    results << res
+  end
+
+  return results
+
 end
 
-p res
+# execution
+p crypto_scrapper
